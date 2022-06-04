@@ -1,72 +1,87 @@
-// #ifndef Q3_H
-// #define Q3_H
+#ifndef Q3_H
+#define Q3_H
 
-// #include<iostream>
-// #include<queue>
-// #include<vector>
+#include<iostream>
+#include<queue>
 
-// namespace q3
-// {
-//     struct Flight
-//     {
-//         std::string flight_number;
-//         size_t duration;
-//         size_t connections;
-//         size_t connection_times;
-//         size_t price;
-//     };
-//     static size_t time_cal(std::string time)
-//     {   
-//         if(time.empty())
-//         {
-//             return 0;
-//         }
+namespace q3
+{
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Flight
+    {
+        std::string flight_number;
+        size_t duration;
+        size_t connections;
+        size_t connection_times;
+        size_t price;
+    };
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static size_t Time(std::string time)
+    {   
+        if(time.empty())
+            return 0;
+        std::regex pattern(R"((\d+)\h(\d+)?\m?)");
+        std::smatch match;
+        std::regex_search(time, match, pattern);
+        size_t hour = std::stoi(match[1]) * 60;
+        std::string minute = match[2];
+        if(minute.empty())
+            return hour;
+        else
+            return hour + std::stoi(minute);
+    }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static std::stack<Flight> sortStack(std::stack<Flight> &input)
+    {
+        std::stack<Flight> tmpStack;
+        int tmpstack = 0;
+        while (!input.empty())
+        {
+            // pop out the first element
+            auto tmp = input.top();
+            int tmpinput = tmp.duration + tmp.connection_times + 3 * tmp.price;
+            input.pop();
+    
+            // while temporary stack is not empty and top
+            // of stack is greater than temp
+            while (!tmpStack.empty() && tmpstack < tmpinput)
+            {
+                // pop from temporary stack and push
+                // it to the input stack
+                input.push(tmpStack.top());
+                tmpStack.pop();
+                if(!tmpStack.empty())
+                    tmpstack = tmpStack.top().duration + tmpStack.top().connection_times + 3 * tmpStack.top().price;
+            }
+            // push temp in temporary of stack
+            tmpStack.push(tmp);
+            tmpstack = tmpStack.top().duration + tmpStack.top().connection_times + 3 * tmpStack.top().price;
+        }
+        return tmpStack;
+    }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static auto gather_flights(std::string filename)
+    {
+        std::ifstream file(filename);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string txt = buffer.str();
+        std::regex pattern(R"(\d+\- \w+\:(\w+)\ - \w+\:(\d+\h\d*\m*)\ - \w+\:(\d+)\ - \w+\:(\d+\h\d*\m*)\,?(\d*\h*\d*\m*)\,?(\d*\h*\d*\m*) - \w+\:(\d+))");
+        std::smatch match;
+        std::stack<Flight> Flight_info{};
+        while(std::regex_search(txt, match, pattern))
+        {
+            std::string flight_number = match[1];
+            size_t duration = Time(match[2]);  
+            size_t connections = std::stoi(match[3]);
+            size_t connection_times =  Time(match[4]) + Time(match[5]) + Time(match[6]);
+            size_t price = std::stoi(match[7]);
+            Flight_info.push(Flight{flight_number, duration, connections, connection_times, price});
+            txt = match.suffix().str();
+        }
+        Flight_info = sortStack(Flight_info);
+        return Flight_info;
+    }
+}
 
-//         std::regex pattern(R"((\d+)\h(\d+)?\m?)");
-//         std::smatch match;
-//         std::regex_search(time, match, pattern);
-//         size_t total_time{ static_cast<size_t>(std::stoi(match[1])) * 60 };
-//         std::string emp_check { match[2] };
-//         if(emp_check.empty()) //check if it contains minutes
-//         {
-//             return total_time;
-//         }
-//         else
-//         {
-//             return total_time + static_cast<size_t>(std::stoi(match[2]));
-            
-//         }
-//     }
-//     auto comparison{ [](Flight a, Flight b){return (a.duration + a.connection_times + 3 * a.price) > (b.duration + b.connection_times + 3 * b.price);} };
-
-//     std::priority_queue<Flight, std::vector<Flight>, decltype(comparison)> Flight_info{comparison};
-
-//     static auto gather_flights(std::string filename)
-//     {
-//         std::ifstream file(filename);
-//         std::stringstream buffer;
-//         buffer << file.rdbuf();
-//         std::string txt = buffer.str();
-
-//         std::regex pattern(R"(\d+\- \w+\:(\w+)\ - \w+\:(\d+\h\d*\m*)\ - \w+\:(\d+)\ - \w+\:(\d+\h\d*\m*)\,?(\d*\h*\d*\m*)\,?(\d*\h*\d*\m*) - \w+\:(\d+))");
-//         std::smatch match;
-
-//         while(std::regex_search(txt, match, pattern))
-//         {
-            
-//             std::string flight_number{ match[1] };
-//             size_t duration { time_cal(match[2]) };  
-//             size_t connections{ static_cast<size_t>(std::stoi(match[3])) };
-//             size_t connection_times{ time_cal(match[4]) + time_cal(match[5]) + time_cal(match[6]) };
-//             size_t price{ static_cast<size_t>(std::stoi(match[7])) };
-
-//             Flight_info.push(Flight{flight_number, duration, connections, connection_times, price});
-//             txt = match.suffix().str();
-//         }
-
-//         return Flight_info;
-//     }
-
-// }
-
-// #endif //Q3_H
+#endif //Q3_H

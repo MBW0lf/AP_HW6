@@ -27,17 +27,17 @@
 //     };
 
 //     //functions for accumulate
-//     double avg_cal_x(double avg, Sensor& s)
+//     static double avg_cal_x(double avg, Sensor& s)
 //     {
 //         return avg + s.pos.x * s.accuracy;
 //     }
 
-//     double avg_cal_y(double avg, Sensor& s)
+//     static double avg_cal_y(double avg, Sensor& s)
 //     {
 //         return avg + s.pos.y * s.accuracy;
 //     }
 
-//     Vector2D kalman_filter(std::vector<Sensor> sensors)
+//     static Vector2D kalman_filter(std::vector<Sensor> sensors)
 //     {
 //         double accuracy_sum{ std::accumulate(sensors.begin(), sensors.end(), 0.0 , [](double ans, Sensor& s){return ans + s.accuracy;}) };
 //         double x_pos{ std::accumulate(sensors.begin(), sensors.end(), 0.0, avg_cal_x) / accuracy_sum };
