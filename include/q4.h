@@ -1,52 +1,48 @@
-// #ifndef Q4_H
-// #define Q4_H
-// #include<numeric>
+#ifndef Q4_H
+#define Q4_H
+#include<numeric>
 
-// namespace q4
-// {
-//     struct Vector2D
-//     {
-//         Vector2D(double _x = 0, double _y = 0)
-//         :x{ _x }
-//         ,y{ _y }
-//         {
-//         }
-//         double x{};
-//         double y{}; 
-//     };
+namespace q4
+{
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Vector2D
+    {
+        double x{};
+        double y{}; 
+    };
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct Sensor
+    {
+        Vector2D pos;
+        double accuracy;    
+    };
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static double mean_x(double mean, Sensor& s)
+    {
+        return mean + s.pos.x * s.accuracy;
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static double mean_y(double mean, Sensor& s)
+    {
+        return mean + s.pos.y * s.accuracy;
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static double acc_sum(double sum, Sensor& s)
+    {
+        return sum + s.accuracy;   
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static Vector2D kalman_filter(std::vector<Sensor> sensors)
+    {
+        double accuracy_sum = std::accumulate(sensors.begin(), sensors.end(), 0.0 , acc_sum);
+        double x_pos = std::accumulate(sensors.begin(), sensors.end(), 0.0, mean_x) / accuracy_sum;
+        double y_pos = std::accumulate(sensors.begin(), sensors.end(), 0.0, mean_y) / accuracy_sum;
 
-//     struct Sensor
-//     {
-//         Sensor(Vector2D _pos, double _accuracy = 0)
-//         :pos{ _pos }
-//         ,accuracy{ _accuracy }
-//         {
-//         }
-//         Vector2D pos;
-//         double accuracy;    
-//     };
+        Vector2D Position{};
+        Position.x = x_pos;
+        Position.y = y_pos;
+        return Position;
+    }
+}
 
-//     //functions for accumulate
-//     static double avg_cal_x(double avg, Sensor& s)
-//     {
-//         return avg + s.pos.x * s.accuracy;
-//     }
-
-//     static double avg_cal_y(double avg, Sensor& s)
-//     {
-//         return avg + s.pos.y * s.accuracy;
-//     }
-
-//     static Vector2D kalman_filter(std::vector<Sensor> sensors)
-//     {
-//         double accuracy_sum{ std::accumulate(sensors.begin(), sensors.end(), 0.0 , [](double ans, Sensor& s){return ans + s.accuracy;}) };
-//         double x_pos{ std::accumulate(sensors.begin(), sensors.end(), 0.0, avg_cal_x) / accuracy_sum };
-//         double y_pos{ std::accumulate(sensors.begin(), sensors.end(), 0.0, avg_cal_y) / accuracy_sum };
-
-//         Vector2D final_pos{ x_pos, y_pos };
-
-//         return final_pos;
-//     }
-// }
-
-// #endif //Q4_H
+#endif //Q4_H
